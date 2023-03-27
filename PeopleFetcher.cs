@@ -43,25 +43,21 @@ namespace CatWorx.BadgeMaker
                 var employeeList = json["results"];
                 if (employeeList is not null)
                 {
-                    int employeeCount = (int)employeeList.Count();
-                    for (int i = 0; i < employeeCount; i++)
+                    foreach (JToken token in employeeList!)
                     {
-                        string employeeFirst = (string)employeeList[i]["name"]["first"];
-                        string employeeLast = (string)employeeList[i]["name"]["last"];
-                        string id = (string)employeeList[i]["id"]["value"];
-                        string noDashes = id.Replace("-", "");
-                        int employeeID = Int32.Parse(noDashes);
-                        string photoURL = (string)employeeList[i]["picture"]["large"];
-                        // Console.WriteLine($"First Name: {employeeFirst}, Last Name: {employeeLast}, ID: {employeeID}, Photo: {photoURL}");
                         Employee emp = new Employee
                         (
-                            employeeFirst,
-                            employeeLast,
-                            employeeID,
-                            photoURL
+                            token.SelectToken("name.first")!.ToString(),
+                            token.SelectToken("name.last")!.ToString(),
+                            Int32.Parse(token.SelectToken("id.value")!.ToString().Replace("-", "")),
+                            token.SelectToken("picture.large")!.ToString()
                         );
                         employees.Add(emp);
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Data not found - API may be down");
                 }
             }
             return employees;
